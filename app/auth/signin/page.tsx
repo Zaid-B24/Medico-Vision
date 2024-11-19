@@ -6,21 +6,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { signInSchema } from "@/lib/zod";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 
-export default function  Signin() {
+export default function SignIn() {
     const [globalError, setGlobalError] = useState<string>("");
-    const form = useForm({
-        defaultValues:{
-            email:"",
-            password:""
-        }
+    const form = useForm<z.infer<typeof signInSchema>>({
+        resolver: zodResolver(signInSchema),
+        defaultValues: {
+            email: "",
+            password: "",
+        },
     });
-
-    
 
     const onSubmit = async (values: z.infer<typeof signInSchema>) => {
         try {
@@ -29,11 +31,11 @@ export default function  Signin() {
                 setGlobalError(result.message);
             }
         } catch (error) {
-            console.log("An unexpected error occurred. Please try again.", error);
+            console.log("An unexpected error occurred. Please try again.",error);
         }
     };
 
-    return(
+    return (
         <div className="flex items-center justify-center min-h-screen p-4">
             <Card className="w-full max-w-md">
                 <CardHeader>
@@ -108,6 +110,5 @@ export default function  Signin() {
                 </CardContent>
             </Card>
         </div>
-    )
+    );
 }
-

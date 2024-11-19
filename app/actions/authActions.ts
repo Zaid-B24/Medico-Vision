@@ -16,11 +16,11 @@ export async function handleCredentialsSignin (
             switch(error.type){
                 case 'CredentialsSignin':
                 return {
-                    messaeg: 'Invalid credentials',
+                    message: 'Invalid credentials',
                 }
                 default:
                     return {
-                        messae: 'Something went wrong'
+                        message: 'Something went wrong'
                     }
             }
         }
