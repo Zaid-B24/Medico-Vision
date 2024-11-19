@@ -7,21 +7,12 @@ import { Button } from './ui/button';
 export default function ThemeToggler() {
   const { theme, setTheme } = useTheme();
 
-  const switchTheme = () => {
-    switch (theme) {
-      case 'light':
-        setTheme('dark');
-        break;
-      case 'dark':
-        setTheme('light');
-        break;
-      default:
-        break;
-    }
-  };
-
   const toggleTheme = () => {
-      switchTheme();
+    if (theme === 'light') {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
   };
 
   return (
