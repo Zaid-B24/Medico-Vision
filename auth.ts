@@ -8,8 +8,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // You can specify which fields should be submitted, by adding keys to the `credentials` object.
       // e.g. domain, username, password, 2FA token, etc.
       credentials: {
-        email: {},
-        password: {},
+        email: {label:"Email", type:"email", placeholder:"Email"},
+        password: {label:"Password", type:"pssword", placeholder:"Password"},
       },
       authorize: async (credentials) => {
         let user = null
@@ -38,6 +38,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+
+  callbacks: {
+    authorized({ request: { nextUrl }, auth }) {
+        const isLoggedIn = !!auth?.user;
+        const { pathname } = nextUrl;
+        
+        if (pathname.startsWith('/auth/signin') && isLoggedIn) {
+            return Response.redirect(new URL('/', nextUrl));
+        }
+        // if (pathname.startsWith("/page2") && role !== "admin") {
+        //     return Response.redirect(new URL('/', nextUrl));
+        // }
+        return !!auth;
+    },
+    // jwt({ token, user, trigger, session }) {
+    //     if (user) {
+    //         token.id = user.id as string;
+    //         token.role = user.role as string;
+    //     }
+    //     if (trigger === "update" && session) {
+    //         token = { ...token, ...session };
+    //     }
+    //     return token;
+    // },
+    // session({ session, token }) {
+    //     session.user.id = token.id;
+    //     session.user.role = token.role;
+    //     return session;
+    // }
+},
   pages:{
     signIn: "/auth/signin"
   }

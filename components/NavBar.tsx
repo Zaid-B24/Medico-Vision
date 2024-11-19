@@ -1,21 +1,34 @@
-// import { auth } from "@/auth"
 import Image from "next/image";
 import Link from "next/link";
 import ThemeToggler from "./ThemeToggler";
+import { Button } from "./ui/button";
+import { auth } from "@/auth";
+import { handleSignout } from "@/app/actions/authActions";
 
-const Navbar =  () => {
-    // const sesssion = await auth();
-    
+export default async function Navbar() {
+    const session = await auth();
+    console.log(session);
+
     return (
-        <header className="px-5 py-5 bg-black shadow-sm">
-            <nav className="flex justify-between items-center">
-                <Link href="/">
-                    <Image src="/logo.png" alt="logo" height={7} width={40} />
-                </Link>
-                <ThemeToggler/>
-            </nav>
-        </header>
-    )
-}
+        <nav className="flex justify-between items-center py-3 px-4 bg-white shadow-md">
+            <Link href="/" className="text-xl font-bold">
+                <Image src="/logo.png" alt="logo" height={10} width={40} />
+            </Link>
 
-export default Navbar;
+            <div className="flex items-center space-x-4">
+                <ThemeToggler />
+                {!session ? (
+                    <Link href="/auth/signin">
+                        <Button variant="default">Sign In</Button>
+                    </Link>
+                ) : (
+                    <form action={handleSignout}>
+                        <Button variant="default" type="submit">
+                            Sign Out
+                        </Button>
+                    </form>
+                )}
+            </div>
+        </nav>
+    );
+}
