@@ -88,9 +88,9 @@ export default function SignIn() {
                             />
 
                             {/* Submit button will go here */}
-                            <LoadingButton
-                                pending={form.formState.isSubmitting}
-                            />
+                            <LoadingButton pending={form.formState.isSubmitting}>Sign in</LoadingButton>
+                                
+                            
                         </form>
                     </Form>
 

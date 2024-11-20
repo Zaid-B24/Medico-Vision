@@ -10,25 +10,27 @@ export default async function Navbar() {
     console.log(session);
 
     return (
-        <nav className="flex justify-between items-center py-3 px-4 bg-white shadow-md">
+        <nav className="flex justify-between items-center py-3 px-4 fixed top-0 left-0 right-0 z-50 bg-slate-100">
             <Link href="/" className="text-xl font-bold">
-                <Image src="/logo.png" alt="logo" height={10} width={40} />
+                <Image src='/logo.png' alt="logo" height={10} width={20}  />
             </Link>
-
-            <div className="flex items-center space-x-4">
-                <ThemeToggler />
-                {!session ? (
+            {!session ? (
+                <div className="flex gap-2 justify-center">
+                    <ThemeToggler/>
                     <Link href="/auth/signin">
                         <Button variant="default">Sign In</Button>
                     </Link>
-                ) : (
-                    <form action={handleSignout}>
-                        <Button variant="default" type="submit">
-                            Sign Out
-                        </Button>
-                    </form>
-                )}
-            </div>
+                    <Link href="/auth/signup">
+                        <Button variant="default">Sign Up</Button>
+                    </Link>
+                </div>
+            ) : (
+                <form action={handleSignout}>
+                    <Button variant="default" type="submit">
+                        Sign Out
+                    </Button>
+                </form>
+            )}
         </nav>
     );
 }

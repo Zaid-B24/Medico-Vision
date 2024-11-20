@@ -1,7 +1,12 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import GitHub from "next-auth/providers/github"
- 
+import prisma from "./lib/prisma"
+import { signInSchema } from "./lib/zod"
+import bcryptjs from "bcryptjs"; // Fixed import statement for bcryptjs
+
+const publicRoutes = ["/auth/signup", "/auth/signin "]
+const authRoutes = ["/auth/signup", "/auth/signin "]
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [GitHub,
     Credentials({
@@ -11,30 +16,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: {label:"Email", type:"email", placeholder:"Email"},
         password: {label:"Password", type:"pssword", placeholder:"Password"},
       },
-      authorize: async (credentials) => {
-        let user = null
+      async authorize(credentials) {
+        const parsedCredentials = signInSchema.safeParse(credentials);
 
-        const parsedCredentials = (credentials);
-        if(!parsedCredentials) {
-            console.error("Invalid credentials")
+        if (!parsedCredentials.success) {
+          console.error("Invalid credentials", parsedCredentials.error.errors);
+          return null;
         }
 
-        user = {
-            id: '1',
-            name: 'Aditya Singh',
-            email: 'jojo@jojo.com',
-            role: "admin"
+        const user = await prisma.user.findUnique({
+          where: {
+            email: parsedCredentials.data.email,
+          },
+        });
+
+        if (!user || !user.password) {
+          console.log("Invalid credentials.");
+          return null;
         }
- 
-       
-        if (!user) {
-          // No user found, so this is their first attempt to login
-          // Optionally, this is also the place you could do a user registration
-          throw new Error("Invalid credentials.")
+
+        const isPasswordVerified = await bcryptjs.compare(
+          parsedCredentials.data.password,
+          user.password
+        );
+
+        if (!isPasswordVerified) {
+          console.log("Invalid password.");
+          return null;
         }
- 
-        // return user object with their profile data
-        return user
+
+        const { ...userWithoutPassword } = user;
+        return userWithoutPassword;
+
       },
     }),
   ],
@@ -44,29 +57,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const isLoggedIn = !!auth?.user;
         const { pathname } = nextUrl;
         
-        if (pathname.startsWith('/auth/signin') && isLoggedIn) {
-            return Response.redirect(new URL('/', nextUrl));
-        }
-        // if (pathname.startsWith("/page2") && role !== "admin") {
-        //     return Response.redirect(new URL('/', nextUrl));
-        // }
-        return !!auth;
+       if(publicRoutes.includes(pathname)) {
+        return true
+       }
+       
+       if(authRoutes.includes(pathname)){
+        if(isLoggedIn) {
+            return Response.redirect(new URL ('/', nextUrl))
+        }return true;
+       }
+        return isLoggedIn
     },
-    // jwt({ token, user, trigger, session }) {
-    //     if (user) {
-    //         token.id = user.id as string;
-    //         token.role = user.role as string;
-    //     }
-    //     if (trigger === "update" && session) {
-    //         token = { ...token, ...session };
-    //     }
-    //     return token;
-    // },
-    // session({ session, token }) {
-    //     session.user.id = token.id;
-    //     session.user.role = token.role;
-    //     return session;
-    // }
+    jwt({ token, user, trigger, session }) {
+        if (user) {
+            token.id = user.id as string;
+            token.role = user.role as string;
+        }
+        if (trigger === "update" && session) {
+            token = { ...token, ...session };
+        }
+        return token;
+    },
+    session({ session, token }) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        return session;
+    }
 },
   pages:{
     signIn: "/auth/signin"
